@@ -28,7 +28,7 @@ from selenium.common.exceptions import MoveTargetOutOfBoundsException
 def bypass_suspicious_login(
     browser, logger, logfolder, bypass_security_challenge_using
 ):
-    """Bypass suspicious loggin attempt verification."""
+    """Bypass suspicious login attempt verification."""
 
     # close sign up Instagram modal if available
     dismiss_get_app_offer(browser, logger)
