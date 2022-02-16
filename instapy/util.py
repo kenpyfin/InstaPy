@@ -77,16 +77,20 @@ def is_private_profile(browser, logger, following=True):
     :param following: Not accessed
     :return: None if profile cannot be verified
     """
-
-    shared_data = get_shared_data(browser)
-    data = shared_data["entry_data"]["ProfilePage"][0]
-
-    # Sometimes shared_data["entry_data"]["ProfilePage"][0] is empty, but get_additional_data()
-    # fetches all data needed
-    if not data:
+    is_private = None
+    try:
+        # DEF: 22jan function refactored
         data = get_additional_data(browser)
-
-    is_private = data["graphql"]["user"]["is_private"]
+        is_private = data["items"][0]
+        is_private = is_private["user"]['is_private'] if is_private else None
+        logger.info(
+            "Checked if '{}' is private, and it is: '{}'".format(
+                data["items"][0]["user"]["username"], is_private
+            )
+        )
+    except:
+        logger.info("Cannot find is_private so defined as None")
+        is_private = None
 
     return is_private
 
@@ -158,19 +162,22 @@ def validate_username(
         web_address_navigator(browser, link)
 
         try:
+            # todo: check if this section works
+            # old "PostPage[0].graphql.shortcode_media.owner.username"
             username = browser.execute_script(
                 "return window._sharedData.entry_data."
-                "PostPage[0].graphql.shortcode_media.owner.username"
+                "PostPage[0].items[0].user.username"
             )
 
         except WebDriverException:
             try:
                 browser.execute_script("location.reload()")
                 update_activity(browser, state=None)
-
+                # todo: check if this section works
+                # old "PostPage[0].graphql.shortcode_media.owner.username"
                 username = browser.execute_script(
                     "return window._sharedData.entry_data."
-                    "PostPage[0].graphql.shortcode_media.owner.username"
+                    "PostPage[0].items[0].user.username"
                 )
 
             except WebDriverException:
@@ -487,7 +494,6 @@ def getUserData(
     shared_data = get_shared_data(browser)
     data = shared_data["entry_data"]["ProfilePage"][0]
 
-    # Sometimes shared_data["entry_data"]["ProfilePage"][0] is empty, but get_additional_data()
     # fetches all data needed
     if not data:
         data = get_additional_data(browser)
@@ -507,7 +513,14 @@ def getMediaData(
     browser,
 ):
     additional_data = get_additional_data(browser)
-    data = additional_data["graphql"]["shortcode_media"]
+    data = additional_data["items"][0]
+
+    # todo: remove rewrite query by modifing call to getMediaData functions in other files
+    if query == "comments_disabled": query = "comment_likes_enabled"
+    if query == "edge_media_to_parent_comment": query = "comments"
+    if query == "edge_media_to_parent_comment.count": query = "comment_count"
+    if query == "edge_media_preview_comment": query = "preview_comments"
+    if query == "edge_media_preview_comment.count": query = "comment_count"
 
     if query.find(".") == -1:
         data = data[query]
@@ -2458,8 +2471,11 @@ def get_cord_location(browser, location):
     ).text
     data = json.loads(json_text)
 
-    lat = data["graphql"]["location"]["lat"]
-    lon = data["graphql"]["location"]["lng"]
+    # DEF: 22jan
+    lat = lon = ""
+    if "location" in data["items"][0]:
+        lat = data["items"][0]["location"]["lat"]
+        lon = data["items"][0]["location"]["lng"]
 
     return lat, lon
 
