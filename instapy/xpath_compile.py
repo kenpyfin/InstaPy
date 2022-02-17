@@ -94,12 +94,22 @@ xpath["get_comments_on_post"] = {
 
 xpath["get_cord_location"] = {"json_text": "//body"}
 
+# xpath["get_following_status"] = {
+#     "follow_button_XP": "//button[text()='Following' or \
+#                                   text()='Requested' or \
+#                                   text()='Follow' or \
+#                                   text()='Follow Back' or \
+#                                   text()='Unblock' and not(ancestor::*/@role = 'presentation')]",
+#     "follow_span_XP_following": "//button/div/span[contains(@aria-label, 'Following')]",
+# }
+
 xpath["get_following_status"] = {
-    "follow_button_XP": "//button[text()='Following' or \
-                                  text()='Requested' or \
-                                  text()='Follow' or \
-                                  text()='Follow Back' or \
-                                  text()='Unblock' and not(ancestor::*/@role = 'presentation')]",
+    "follow_button_XP": "//button/div[text()='Following' or \
+                                    text()='Requested' or \
+                                    text()='Follow' or \
+                                    text()='Follow Back' or \
+                                    text()='Message' or \
+                                    text()='Unblock' and not(ancestor::*/@role = 'presentation')]",
     "follow_span_XP_following": "//button/div/span[contains(@aria-label, 'Following')]",
 }
 
